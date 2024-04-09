@@ -57,15 +57,15 @@ gitstatuscolor=$(tput setaf 220);
 bold=$(tput bold);
 reset=$(tput sgr0);
 
-PS1="\[\033]0;\w\007\]"; # Displays current working directory as title of the terminal
-PS1+="\[${bold}\]\n(\d) \T\n";
-PS1+="(\[${usernamecolor}\]\u)"; # Displays username
-PS1+="\[${white}\] at ";
-PS1+="\[${locationcolor}\]\h" # Displays host/device
+PS1="\[\033]0;\w\007\]\n"; # Displays current working directory as title of the terminal
+#PS1+="\[${bold}\]\n(\d) \T\n";
+PS1+="┌──\[${locationcolor}\][ubuntu@"; # Displays username
+#PS1+="\[${white}\] at ";
+PS1+="\[${locationcolor}\]ubuntu]" # Displays host/device
 PS1+="\[${white}\] in ";
 PS1+="\[${workingdirectorycolor}\]\w"; # Displays base path of current working directory
 PS1+="\$(prompt_git \"\[${white}\] on \[${gitstatuscolor}\]\" \"\[${gitstatuscolor}\]\")"; # Displays git status
-PS1+="\n";
+PS1+="\n\[${reset}\]└─";
 PS1+="\[${white}\]\$ \[${reset}\]";
 export PS1;
 
@@ -106,3 +106,48 @@ alias ....='cd ../../../../'
 alias .....='cd ../../../../'
 alias .4='cd ../../../../'
 alias .5='cd ../../../../..'
+
+apt() {
+  command nala "$@"
+}
+sudo() {
+  if [ "$1" = "apt" ]; then
+    shift
+    command sudo nala "$@"
+  else
+    command sudo "$@"
+  fi
+}
+
+alias grep='grep --color=auto --binary-files=without-match' 
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -iv'
+alias mkdir='mkdir -p'
+alias ps='ps auxf'
+alias ping='ping -c 10'
+alias less='less -R'
+
+# Extracts any archive(s) (if unp isn't installed)
+ex () {
+	for archive in $*; do
+		if [ -f $archive ] ; then
+			case $archive in
+				*.tar.bz2)   tar xvjf $archive    ;;
+				*.tar.gz)    tar xvzf $archive    ;;
+				*.bz2)       bunzip2 $archive     ;;
+				*.rar)       rar x $archive       ;;
+				*.gz)        gunzip $archive      ;;
+				*.tar)       tar xvf $archive     ;;
+				*.tbz2)      tar xvjf $archive    ;;
+				*.tgz)       tar xvzf $archive    ;;
+				*.zip)       unzip $archive       ;;
+				*.Z)         uncompress $archive  ;;
+				*.7z)        7z x $archive        ;;
+				*)           echo "don't know how to extract '$archive'..." ;;
+			esac
+		else
+			echo "'$archive' is not a valid file!"
+		fi
+	done
+}
