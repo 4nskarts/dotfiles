@@ -1,111 +1,33 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
+#
+# /etc/bash.bashrc
+#
 
 # If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+[[ $- != *i* ]] && return
 
-# don't put duplicate lines in the history. See bash(1) for more options
-# ... or force ignoredups and ignorespace
-HISTCONTROL=ignoredups:ignorespace
+[[ $DISPLAY ]] && shopt -s checkwinsize
 
-# append to the history file, don't overwrite it
-shopt -s histappend
+PS1='[\u@\h \W]\$ '
 
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+case ${TERM} in
+  Eterm*|alacritty*|aterm*|foot*|gnome*|konsole*|kterm*|putty*|rxvt*|tmux*|xterm*)
+    PROMPT_COMMAND+=('printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/\~}"')
 
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
-
-# make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color) color_prompt=yes;;
-esac
-
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-#force_color_prompt=yes
-
-if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
-    else
-	color_prompt=
-    fi
-fi
-
-reset=$(tput sgr0);
-#if [ "$color_prompt" = yes ]; then
-    PS1='\n┌──${debian_chroot:+($debian_chroot)}\[\033[01;32m\](ubuntu@ubuntu)\[\033[00m\]-\[\033[01;34m\](\w)\n\[${reset}\]└─\[\033[00m\]\$ '
-#else
-#    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-#fi
-unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in 
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
     ;;
-*)
+  screen*)
+    PROMPT_COMMAND+=('printf "\033_%s@%s:%s\033\\" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/\~}"')
     ;;
 esac
 
-# # enable color support of ls and also add handy aliases
-# if [ -x /usr/bin/dircolors ]; then
-#     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-#     alias ls='ls --color=auto'
-#     #alias dir='dir --color=auto'
-#     #alias vdir='vdir --color=auto'
+if [[ -r /usr/share/bash-completion/bash_completion ]]; then
+  . /usr/share/bash-completion/bash_completion
+fi
 
-#     alias grep='grep --color=auto'
-#     alias fgrep='fgrep --color=auto'
-#     alias egrep='egrep --color=auto'
-# fi
+eval "$(starship init bash)"
 
-
-# Quickly find out external IP address for your device by typing 'xip'
-# Make a directory and jump right into it. Combination of mkdir and cd. Just use 'mkcdir folder_name'
-mkcdir()
-{
-	mkdir -p -- "$1" &&
-		cd -P -- "$1"
-}
-
-# Update, upgrade and clean apt packages in your system with just one command. Just type 'update' in terminal
-update () {
-	echo -e "\nStarting system update..."
-	echo -e "\nUpdating list of available apt packages and their versions..."
-	sudo apt update -qq
-	echo -e "\nUpgrading apt packages to newer version..."
-	sudo apt upgrade -yy
-	echo -e "\nRemoving packages no more needed as dependencies..."
-	sudo apt autoremove -yy
-	echo -e "\nRemoving packages that can no longer be downloaded..."
-	sudo apt autoclean
-	echo -e "\nClearing out local repository of retrieved package files..."
-	sudo apt clean
-	echo -e "\nUpdate complete!"
-}
-# Shows current weather, live currency and a random quote at terminal startup.
-# Comment any or all below to disable startup runs for each.
-alias ls='lsd'
-alias l='ls' 
+# user defined config
+alias ls='ls --color=auto'
+alias l='ls'
 alias la='ls -a'
 alias lla='ls -la'
 alias lt='ls --tree'
@@ -116,20 +38,7 @@ alias ....='cd ../../../../'
 alias .....='cd ../../../../'
 alias .4='cd ../../../../'
 alias .5='cd ../../../../..'
-
-apt() {
-  command nala "$@"
-}
-sudo() {
-  if [ "$1" = "apt" ]; then
-    shift
-    command sudo nala "$@"
-  else
-    command sudo "$@"
-  fi
-}
-
-alias grep='grep --color=auto' 
+alias grep='grep --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -iv'
@@ -168,28 +77,32 @@ ex () {
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+mkcdir()
+{
+	mkdir -p -- "$1" &&
+		cd -P -- "$1"
+}
 
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
+# Define the fzfd function
+function fzfd() {
+    sh ~/.local/bin/tmux-sessionizer.sh
+}
 
+# Bind Ctrl-f to the fzfd function
+bind '"\C-f":"fzfd\n"'
 
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    . /etc/bash_completion
-fi
+# Neovim
+export PATH="$PATH:/opt/nvim-linux64/bin"
 
+# Setting $XDG_CONFIG_HOME
+export XDG_CONFIG_HOME=$HOME/.config
 
-# pnpm
-export PNPM_HOME="/home/anskarts/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
+# Setting up android cmdline
+export ANDROID_HOME="/opt/android-sdk"
+export PATH="$PATH:$ANDROID_HOME/platform-tools"
+export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+export PATH=$JAVA_HOME/bin:$PATH
+export CHROME_EXECUTABLE=/bin/brave
+
+export PATH="$PATH:`pwd`/flutter/bin"
+

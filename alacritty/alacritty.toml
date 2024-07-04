@@ -1,0 +1,28 @@
+live_config_reload = true
+
+[font]
+normal = { family = "0xProto Nerd Font", style = "Regular" }
+size = 14
+
+[mouse]
+hide_when_typing = true
+
+[scrolling]
+multiplier = 15
+
+[selection]
+save_to_clipboard = true
+semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
+
+[window]
+dynamic_title = false
+opacity = 0.2
+startup_mode = "Windowed"
+decorations_theme_variant = "None"
+decorations = "Full"
+resize_increments = true
+
+[window.padding]
+x = 4
+
+
